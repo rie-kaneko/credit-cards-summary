@@ -1,1 +1,3 @@
-# credit-cards-summary
+# Coding Challenge: Credit Cards Summary
+
+## Description
