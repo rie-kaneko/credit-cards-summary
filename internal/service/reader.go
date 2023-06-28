@@ -9,60 +9,82 @@ import (
 	"time"
 )
 
-type Reader interface {
-	readCSV() (*Email, error)
-}
-
 type transaction struct {
 	Id          int    `csv:"id"`
 	Date        string `csv:"date"`
 	Transaction string `csv:"transaction"`
 }
 
-func (s *Service) readCSV() (*Email, error) {
-	path := fmt.Sprintf("%s/%s.csv", s.Config.Environment.CsvPath, "txns-credit")
-	f, err := os.Open(path)
+func (s *Service) readCSV(credit string, debit string) (*Email, error) {
+	s.Log.Debugf("[%s] start to read CSV files", s.CorrelationID)
+
+	pathCredit := fmt.Sprintf("%s/%s/%s", s.Config.Environment.CsvPath, toProcessPath, credit)
+	fCredit, err := os.Open(pathCredit)
 	if err != nil {
 		return nil, err
 	}
-	defer f.Close()
+	defer fCredit.Close()
 
-	var ts []transaction
+	pathDebit := fmt.Sprintf("%s/%s/%s", s.Config.Environment.CsvPath, toProcessPath, debit)
+	fDebit, err := os.Open(pathDebit)
+	if err != nil {
+		return nil, err
+	}
+	defer fDebit.Close()
 
-	if err = gocsv.UnmarshalFile(f, &ts); err != nil {
-		fmt.Println(err.Error())
+	var tsCredit, tsDebit []transaction
+
+	if err = gocsv.UnmarshalFile(fCredit, &tsCredit); err != nil {
 		return nil, err
 	}
 
-	return summaryInformation(ts)
+	if err = gocsv.UnmarshalFile(fDebit, &tsDebit); err != nil {
+		return nil, err
+	}
+
+	return summaryInformation(tsCredit, tsDebit)
 }
 
-func summaryInformation(ts []transaction) (*Email, error) {
-	var total float64
-	var err error
+func summaryInformation(tsCredit, tsDebit []transaction) (*Email, error) {
 	numTrans := make(map[string]int)
 
+	tCredit, avCredit, err := getSummary(tsCredit, numTrans)
+	if err != nil {
+		return nil, err
+	}
+
+	tDebit, avDebit, err := getSummary(tsDebit, numTrans)
+	if err != nil {
+		return nil, err
+	}
+
+	return &Email{
+		Balance:         tCredit + tDebit,
+		DebitAverage:    avDebit,
+		CreditAverage:   avCredit,
+		NumTransactions: numTrans,
+	}, err
+}
+
+func getSummary(ts []transaction, numTrans map[string]int) (float64, float64, error) {
+	var total float64
+	var err error
 	for _, t := range ts {
 		total, err = getBalance(total, t.Transaction)
 		if err != nil {
-			return nil, err
+			return 0, 0, err
 		}
 
 		numTrans, err = getNumTransactions(numTrans, t.Date)
 		if err != nil {
-			return nil, err
+			return 0, 0, err
 		}
 	}
 
 	total = math.Round(total*100) / 100
 	av := math.Round(total/float64(len(ts))*100) / 100
 
-	return &Email{
-		Balance:         total,
-		DebitAverage:    0,
-		CreditAverage:   av,
-		NumTransactions: numTrans,
-	}, err
+	return total, av, nil
 }
 
 func getBalance(total float64, t string) (float64, error) {
@@ -84,4 +106,28 @@ func getNumTransactions(numTrans map[string]int, date string) (map[string]int, e
 	numTrans[m]++
 
 	return numTrans, nil
+}
+
+func moveFileToProcessed(csvPath, fileName string) error {
+	originPath := fmt.Sprintf("%s/%s/%s", csvPath, toProcessPath, fileName)
+	destinationPath := fmt.Sprintf("%s/processed/%s", csvPath, fileName) // Path of the destination file
+
+	err := os.Rename(originPath, destinationPath)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func moveFileToNotProcessed(csvPath, fileName string) error {
+	originPath := fmt.Sprintf("%s/%s/%s", csvPath, toProcessPath, fileName)
+	destinationPath := fmt.Sprintf("%s/not_processed/%s", csvPath, fileName) // Path of the destination file
+
+	err := os.Rename(originPath, destinationPath)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

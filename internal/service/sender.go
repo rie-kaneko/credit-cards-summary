@@ -13,10 +13,6 @@ type Email struct {
 	NumTransactions map[string]int
 }
 
-type Sender interface {
-	render(e Email) (string, error)
-}
-
 func (s *Service) render(e *Email) (string, error) {
 	tmpl, err := os.ReadFile(templatePath)
 	if err != nil {
