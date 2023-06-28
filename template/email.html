@@ -1,0 +1,14 @@
+<html>
+    <body>
+        <h1>Hello!</h1>
+        <p>Your total balance is {{balance}}.</p>
+        <p>Your debit average is {{DebitAverage}}.</p>
+        <p>Your credit average is {{CreditAverage}}.</p>
+        <p>Here is numbers of transaction</p>
+        <ul>
+            {{#each NumTransactions}}
+            <li>Number of transaction in {{@key}}: {{this}}</li>
+            {{/each}}
+        </ul>
+    </body>
+</html>
