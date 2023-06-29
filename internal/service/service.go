@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"rie-kaneko/credit-cards-summary/config"
+	"rie-kaneko/credit-cards-summary/internal/aws"
 	"strings"
 	"sync"
 )
@@ -13,6 +14,7 @@ import (
 type Service struct {
 	Config        *config.Configuration
 	Log           *logrus.Logger
+	AwsService    *aws.Service
 	CorrelationID string
 }
 
@@ -20,10 +22,11 @@ type ServiceI interface {
 	Run() error
 }
 
-func NewService(configuration *config.Configuration, logLevel string) *Service {
+func NewService(configuration *config.Configuration, logLevel string, awsService *aws.Service) *Service {
 	return &Service{
-		Config: configuration,
-		Log:    config.InitLogrus(logLevel),
+		Config:     configuration,
+		Log:        config.InitLogrus(logLevel),
+		AwsService: awsService,
 	}
 }
 
@@ -87,10 +90,9 @@ func (s *Service) process(k string, v []string) error {
 		return err
 	}
 
-	rendered, err := s.render(e)
+	err = s.sendMail(e)
 	if err != nil {
 		s.Log.Errorf("[%s] there was an error rendering CSV file information to HTML template: %s", s.CorrelationID, err.Error())
-
 		if err = moveFileToNotProcessed(s.Config.Environment.CsvPath, credit); err != nil {
 			s.Log.Errorf("[%s] there was an error moving credit csv to not processed archive", s.CorrelationID)
 		}
@@ -99,10 +101,6 @@ func (s *Service) process(k string, v []string) error {
 		}
 		return err
 	}
-
-	_ = rendered
-
-	//s.Log.Debugf("id %s html rendered:\n%s", k, rendered)
 
 	_ = moveFileToProcessed(s.Config.Environment.CsvPath, credit)
 	_ = moveFileToProcessed(s.Config.Environment.CsvPath, debit)

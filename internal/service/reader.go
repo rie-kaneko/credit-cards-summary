@@ -63,6 +63,7 @@ func summaryInformation(tsCredit, tsDebit []transaction) (*Email, error) {
 		DebitAverage:    avDebit,
 		CreditAverage:   avCredit,
 		NumTransactions: numTrans,
+		Email:           sender,
 	}, err
 }
 
@@ -110,7 +111,7 @@ func getNumTransactions(numTrans map[string]int, date string) (map[string]int, e
 
 func moveFileToProcessed(csvPath, fileName string) error {
 	originPath := fmt.Sprintf("%s/%s/%s", csvPath, toProcessPath, fileName)
-	destinationPath := fmt.Sprintf("%s/processed/%s", csvPath, fileName) // Path of the destination file
+	destinationPath := fmt.Sprintf("%s/processed/%s", csvPath, fileName)
 
 	err := os.Rename(originPath, destinationPath)
 	if err != nil {
@@ -122,7 +123,7 @@ func moveFileToProcessed(csvPath, fileName string) error {
 
 func moveFileToNotProcessed(csvPath, fileName string) error {
 	originPath := fmt.Sprintf("%s/%s/%s", csvPath, toProcessPath, fileName)
-	destinationPath := fmt.Sprintf("%s/not_processed/%s", csvPath, fileName) // Path of the destination file
+	destinationPath := fmt.Sprintf("%s/not_processed/%s", csvPath, fileName)
 
 	err := os.Rename(originPath, destinationPath)
 	if err != nil {
