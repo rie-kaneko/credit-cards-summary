@@ -12,7 +12,7 @@ RUN go mod tidy
 COPY . .
 
 # Build the Go application inside the container
-ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ENV=local AWS_ACCESS_KEY_ID=xx AWS_SECRET_ACCESS_KEY=xx
+ENV CGO_ENABLED=0 GOOS=linux GOARCH=amd64 ENV=local AWS_ACCESS_KEY_ID=AKIAXYRLKZCY7LBEYN7Z AWS_SECRET_ACCESS_KEY=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
 RUN go build -o endava-coding-exercise
 
 # Set the entry point command for the container

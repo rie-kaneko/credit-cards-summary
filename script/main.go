@@ -10,15 +10,17 @@ import (
 	"time"
 )
 
+const count = 20
+
 func main() {
-	for i := 0; i < 15; i++ {
+	for i := 0; i < count; i++ {
 		generateData(gofakeit.UUID())
 	}
 }
 
 func generateData(name string) {
 	for _, t := range []string{"credit", "debit"} {
-		data := make([][]string, 0, 20)
+		data := make([][]string, 0, count)
 		data = append(data, []string{"id", "date", "transaction"})
 
 		for i := 0; i < gofakeit.IntRange(10, 100); i++ {
@@ -62,7 +64,7 @@ func generateData(name string) {
 	if err != nil {
 		os.Exit(0)
 	}
-	err = a.PutUser(provider.User{
+	err = a.PostUser(provider.User{
 		ID:           name,
 		Name:         gofakeit.Name(),
 		EmailAddress: "", //gofakeit.Email()
