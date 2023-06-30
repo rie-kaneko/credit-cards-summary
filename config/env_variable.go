@@ -11,22 +11,26 @@ var Config Configuration
 
 type Configuration struct {
 	Environment EnvironmentConfig
-	Email       EmailConfig
+	AWS         AWSConfig
 }
 
 type EnvironmentConfig struct {
 	Environment string
 	LogLevel    string
 	CsvPath     string
+	EmailSender string
 }
 
-type EmailConfig struct {
+type AWSConfig struct {
+	Region string
 }
 
 type variablesKeys struct {
 	envPath,
 	logLevel,
-	csvPath string
+	csvPath,
+	emailSender,
+	awsRegion string
 }
 
 func init() {
@@ -39,21 +43,29 @@ func init() {
 
 	vr.SetDefault(keys.logLevel, "error")
 	vr.SetDefault(keys.csvPath, "resources")
+	vr.SetDefault(keys.emailSender, "")
+	vr.SetDefault(keys.awsRegion, "us-east-1")
 
 	Config = Configuration{
 		Environment: EnvironmentConfig{
 			Environment: env,
 			LogLevel:    vr.GetString(keys.logLevel),
 			CsvPath:     vr.GetString(keys.csvPath),
+			EmailSender: vr.GetString(keys.emailSender),
+		},
+		AWS: AWSConfig{
+			Region: vr.GetString(keys.awsRegion),
 		},
 	}
 }
 
 func setVariablesKeys() variablesKeys {
 	return variablesKeys{
-		envPath:  "./environment/%s.env",
-		logLevel: "LOG_LEVEL",
-		csvPath:  "CSV_PATH",
+		envPath:     "./environment/%s.env",
+		logLevel:    "LOG_LEVEL",
+		csvPath:     "CSV_PATH",
+		emailSender: "EMAIL_SENDER",
+		awsRegion:   "AWS_REGION",
 	}
 }
 

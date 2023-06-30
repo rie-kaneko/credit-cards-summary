@@ -42,10 +42,10 @@ func (s *Service) readCSV(credit string, debit string) (*Email, error) {
 		return nil, err
 	}
 
-	return summaryInformation(tsCredit, tsDebit)
+	return s.summaryInformation(tsCredit, tsDebit)
 }
 
-func summaryInformation(tsCredit, tsDebit []transaction) (*Email, error) {
+func (s *Service) summaryInformation(tsCredit, tsDebit []transaction) (*Email, error) {
 	numTrans := make(map[string]int)
 
 	tCredit, avCredit, err := getSummary(tsCredit, numTrans)
@@ -58,12 +58,15 @@ func summaryInformation(tsCredit, tsDebit []transaction) (*Email, error) {
 		return nil, err
 	}
 
+	user, err := s.AwsService.GetUser(s.CorrelationID)
+
 	return &Email{
-		Balance:         tCredit + tDebit,
+		Name:            user.Name,
+		Balance:         fmt.Sprintf("%.2f", tCredit+tDebit),
 		DebitAverage:    avDebit,
 		CreditAverage:   avCredit,
 		NumTransactions: numTrans,
-		Email:           sender,
+		Email:           user.EmailAddress,
 	}, err
 }
 

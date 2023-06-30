@@ -9,7 +9,7 @@ import (
 
 type Email struct {
 	Name            string
-	Balance         float64
+	Balance         string
 	DebitAverage    float64
 	CreditAverage   float64
 	NumTransactions map[string]int
@@ -27,7 +27,6 @@ func (s *Service) sendMail(e *Email) error {
 
 	result, err := s.AwsService.SesClient.SendEmail(&ses.SendEmailInput{
 		Destination: &ses.Destination{
-			CcAddresses: []*string{},
 			ToAddresses: []*string{
 				aws.String(e.Email),
 			},
@@ -44,7 +43,7 @@ func (s *Service) sendMail(e *Email) error {
 				Data:    aws.String(subject),
 			},
 		},
-		Source: aws.String(sender),
+		Source: aws.String(s.Config.Environment.EmailSender),
 	})
 	if err != nil {
 		return err

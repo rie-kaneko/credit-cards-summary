@@ -3,12 +3,12 @@ package main
 import (
 	"os"
 	"rie-kaneko/credit-cards-summary/config"
-	"rie-kaneko/credit-cards-summary/internal/aws"
+	"rie-kaneko/credit-cards-summary/internal/provider"
 	"rie-kaneko/credit-cards-summary/internal/service"
 )
 
 func main() {
-	a, err := aws.NewService()
+	a, err := provider.NewService(config.Config.AWS.Region)
 	if err != nil {
 		os.Exit(0)
 	}

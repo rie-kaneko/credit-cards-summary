@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"rie-kaneko/credit-cards-summary/config"
-	"rie-kaneko/credit-cards-summary/internal/aws"
+	"rie-kaneko/credit-cards-summary/internal/provider"
 	"strings"
 	"sync"
 )
@@ -14,7 +14,7 @@ import (
 type Service struct {
 	Config        *config.Configuration
 	Log           *logrus.Logger
-	AwsService    *aws.Service
+	AwsService    *provider.Service
 	CorrelationID string
 }
 
@@ -22,7 +22,7 @@ type ServiceI interface {
 	Run() error
 }
 
-func NewService(configuration *config.Configuration, logLevel string, awsService *aws.Service) *Service {
+func NewService(configuration *config.Configuration, logLevel string, awsService *provider.Service) *Service {
 	return &Service{
 		Config:     configuration,
 		Log:        config.InitLogrus(logLevel),

@@ -7,5 +7,4 @@ const (
 	maxBatchSize  = 10
 	charSet       = "UTF-8"
 	subject       = "[Coding Challenge] Here is your balance summary"
-	sender        = "bogorie@gmail.com"
 )
