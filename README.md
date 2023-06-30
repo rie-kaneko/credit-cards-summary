@@ -6,6 +6,7 @@
 * [Get Started](#get-started)
   * [Tools](#tools)
   * [Configuration](#configuration)
+  * [Generate own CSV files](#generate-own-csv-files)
   * [Deployment](#deployment)
 * [AWS Tools](#aws-tools)
   * [Amazon SES](#amazon-ses)
@@ -24,7 +25,7 @@ The system is responsible for processing the file and sending a summary of the i
 * Docker
 * AWS CLI
 * IDE (Golang, VSCode, etc)
-* 
+
 ### Configuration
 #### Environment variables in Dockerfile
 ```
@@ -42,8 +43,45 @@ AWS_REGION=
 ```
 _Note: by default the application runs with local environment variables._
 
+### Generate own CSV files
+If you want to generate own CSV file, update the `count` (line 13) to set amount of file you want to create and add `EmailAddress` (line 70) of receiver (destination).
+
+Example
+```go
+.
+const count = 20
+.
+.
+.
+err = a.PostUser(provider.User{
+		ID:           name,
+		Name:         gofakeit.Name(),
+		EmailAddress: "mock@mock.com",
+	})
+```
+Then build the script
+```bash
+go build script/main.go
+```
+and run the script
+```bash
+./main
+```
+then you can see new archives in [to_process](resources/to_process) to system process.
+
 ### Deployment
-to come...
+1. Deploy the application
+```bash
+docker build -t rie-kaneko/credit-cards-summary .
+````
+2. Run the container
+```bash
+docker run -d --name credit-cards-summary rie-kaneko/credit-cards-summary
+```
+3. Verify the running container
+```bash
+docker ps
+```
 
 ## AWS Tools
 ### Amazon SES
@@ -68,6 +106,9 @@ These files are structured as: `{user_id}_{debit|credit}.csv`
 When the system runs, it checks if there are files in the [to_process](resources/to_process) folder to process and send the mail.
 * In case it is processed, these files are moved to [processed](resources/processed).
 * In case any error occurs in the process, the files are moved to [not_processed](resources/not_processed).
+
+### Email
+![img.png](readme_images/img.png)
 
 ## Main Structure
 ```

@@ -61,6 +61,7 @@ func (s *Service) summaryInformation(tsCredit, tsDebit []transaction) (*Email, e
 	user, err := s.AwsService.GetUser(s.CorrelationID)
 
 	return &Email{
+		ID:              user.ID,
 		Name:            user.Name,
 		Balance:         fmt.Sprintf("%.2f", tCredit+tDebit),
 		DebitAverage:    avDebit,
