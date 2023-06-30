@@ -5,9 +5,12 @@ import (
 	"github.com/aws/aws-sdk-go/service/ses"
 	"github.com/aymerick/raymond"
 	"os"
+	"rie-kaneko/credit-cards-summary/internal/provider"
+	"time"
 )
 
 type Email struct {
+	ID              string
 	Name            string
 	Balance         string
 	DebitAverage    float64
@@ -46,10 +49,36 @@ func (s *Service) sendMail(e *Email) error {
 		Source: aws.String(s.Config.Environment.EmailSender),
 	})
 	if err != nil {
+		if result != nil {
+			err = s.AwsService.PostTransaction(provider.Transaction{
+				ID:         *result.MessageId,
+				Sender:     s.Config.Environment.EmailSender,
+				ReceiverID: e.ID,
+				Receiver:   e.Email,
+				Time:       time.Now(),
+				Status:     provider.Failed,
+			})
+			if err != nil {
+				s.Log.Warnf("transaction not registered: %s", err.Error())
+			}
+		}
 		return err
 	}
 
 	s.Log.Debugf("[%s] email sent, message ID: %s", s.CorrelationID, *result.MessageId)
+
+	err = s.AwsService.PostTransaction(provider.Transaction{
+		ID:         *result.MessageId,
+		Sender:     s.Config.Environment.EmailSender,
+		ReceiverID: e.ID,
+		Receiver:   e.Email,
+		Time:       time.Now(),
+		Status:     provider.Succeeded,
+	})
+	if err != nil {
+		s.Log.Warnf("transaction not registered: %s", err.Error())
+	}
+
 	return nil
 }
 

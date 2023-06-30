@@ -7,8 +7,8 @@ import (
 )
 
 const (
-	tableName = "users"
-	keyName   = "id"
+	userTableName = "users"
+	userKeyName   = "id"
 )
 
 type User struct {
@@ -19,9 +19,9 @@ type User struct {
 
 func (s *Service) GetUser(id string) (*User, error) {
 	result, err := s.DynamoClient.GetItem(&dynamodb.GetItemInput{
-		TableName: aws.String(tableName),
+		TableName: aws.String(userTableName),
 		Key: map[string]*dynamodb.AttributeValue{
-			keyName: {
+			userKeyName: {
 				S: aws.String(id),
 			},
 		},
@@ -33,7 +33,7 @@ func (s *Service) GetUser(id string) (*User, error) {
 	return convertToUser(result)
 }
 
-func (s *Service) PutUser(u User) error {
+func (s *Service) PostUser(u User) error {
 	av, err := dynamodbattribute.MarshalMap(u)
 	if err != nil {
 		return err
@@ -41,7 +41,7 @@ func (s *Service) PutUser(u User) error {
 
 	input := &dynamodb.PutItemInput{
 		Item:      av,
-		TableName: aws.String(tableName),
+		TableName: aws.String(userTableName),
 	}
 
 	_, err = s.DynamoClient.PutItem(input)
