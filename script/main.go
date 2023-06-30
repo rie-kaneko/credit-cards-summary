@@ -5,11 +5,13 @@ import (
 	"fmt"
 	"github.com/brianvoe/gofakeit/v6"
 	"os"
+	"rie-kaneko/credit-cards-summary/config"
+	"rie-kaneko/credit-cards-summary/internal/provider"
 	"time"
 )
 
 func main() {
-	for i := 0; i < 20; i++ {
+	for i := 0; i < 15; i++ {
 		generateData(gofakeit.UUID())
 	}
 }
@@ -52,5 +54,20 @@ func generateData(name string) {
 				panic(err)
 			}
 		}
+	}
+
+	// table name = users
+	// primary key = id
+	a, err := provider.NewService(config.Config.AWS.Region)
+	if err != nil {
+		os.Exit(0)
+	}
+	err = a.PutUser(provider.User{
+		ID:           name,
+		Name:         gofakeit.Name(),
+		EmailAddress: "", //gofakeit.Email()
+	})
+	if err != nil {
+		panic(err)
 	}
 }

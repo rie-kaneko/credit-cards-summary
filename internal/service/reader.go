@@ -42,10 +42,10 @@ func (s *Service) readCSV(credit string, debit string) (*Email, error) {
 		return nil, err
 	}
 
-	return summaryInformation(tsCredit, tsDebit)
+	return s.summaryInformation(tsCredit, tsDebit)
 }
 
-func summaryInformation(tsCredit, tsDebit []transaction) (*Email, error) {
+func (s *Service) summaryInformation(tsCredit, tsDebit []transaction) (*Email, error) {
 	numTrans := make(map[string]int)
 
 	tCredit, avCredit, err := getSummary(tsCredit, numTrans)
@@ -58,11 +58,15 @@ func summaryInformation(tsCredit, tsDebit []transaction) (*Email, error) {
 		return nil, err
 	}
 
+	user, err := s.AwsService.GetUser(s.CorrelationID)
+
 	return &Email{
-		Balance:         tCredit + tDebit,
+		Name:            user.Name,
+		Balance:         fmt.Sprintf("%.2f", tCredit+tDebit),
 		DebitAverage:    avDebit,
 		CreditAverage:   avCredit,
 		NumTransactions: numTrans,
+		Email:           user.EmailAddress,
 	}, err
 }
 
@@ -110,7 +114,7 @@ func getNumTransactions(numTrans map[string]int, date string) (map[string]int, e
 
 func moveFileToProcessed(csvPath, fileName string) error {
 	originPath := fmt.Sprintf("%s/%s/%s", csvPath, toProcessPath, fileName)
-	destinationPath := fmt.Sprintf("%s/processed/%s", csvPath, fileName) // Path of the destination file
+	destinationPath := fmt.Sprintf("%s/processed/%s", csvPath, fileName)
 
 	err := os.Rename(originPath, destinationPath)
 	if err != nil {
@@ -122,7 +126,7 @@ func moveFileToProcessed(csvPath, fileName string) error {
 
 func moveFileToNotProcessed(csvPath, fileName string) error {
 	originPath := fmt.Sprintf("%s/%s/%s", csvPath, toProcessPath, fileName)
-	destinationPath := fmt.Sprintf("%s/not_processed/%s", csvPath, fileName) // Path of the destination file
+	destinationPath := fmt.Sprintf("%s/not_processed/%s", csvPath, fileName)
 
 	err := os.Rename(originPath, destinationPath)
 	if err != nil {

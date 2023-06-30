@@ -1,14 +1,52 @@
+<!DOCTYPE html>
 <html>
-    <body>
-        <h1>Hello!</h1>
-        <p>Your total balance is {{balance}}.</p>
-        <p>Your debit average is {{DebitAverage}}.</p>
-        <p>Your credit average is {{CreditAverage}}.</p>
-        <p>Here is numbers of transaction</p>
-        <ul>
-            {{#each NumTransactions}}
-            <li>Number of transaction in {{@key}}: {{this}}</li>
-            {{/each}}
-        </ul>
-    </body>
+<head>
+    <style>
+        table {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        th, td {
+            text-align: left;
+            padding: 8px;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<h1>Financial Summary</h1>
+<table>
+    <tr>
+        <th>Category</th>
+        <th>Value</th>
+    </tr>
+    <tr>
+        <td>Balance</td>
+        <td>${{balance}}</td>
+    </tr>
+    <tr>
+        <td>Average Debit Card</td>
+        <td>${{DebitAverage}}</td>
+    </tr>
+    <tr>
+        <td>Average Credit Card</td>
+        <td>${{CreditAverage}}</td>
+    </tr>
+</table>
+<h2>Transactions per Month</h2>
+<table>
+    <tr>
+        <th>Month</th>
+        <th>Count</th>
+    </tr>
+    {{#each NumTransactions}}
+    <tr>
+        <td>{{@key}}</td>
+        <td>{{this}}</td>
+    </tr>
+    {{/each}}
+</table>
+</body>
 </html>
