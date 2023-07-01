@@ -30,16 +30,18 @@ The system is responsible for processing the file and sending a summary of the i
 #### Environment variables in Dockerfile
 ```
 ENV=
-AWS_ACCESS_KEY_ID=
-AWS_SECRET_ACCESS_KEY=
 ```
 #### Environment variables in `.env` file
-* Setup all environment variables in [environment](environment) package naming `{env_name}.env` Example:
+* Setup all environment variables in [environment](environment) package naming `{env_name}.env`.
+* to use the specific environment variables, create a new file named *{env_name}.env* and copy values from [sample.env](environment/sample.env)
+  and set up the correct values.
 ```
 LOG_LEVEL=
 CSV_PATH=
 EMAIL_SENDER=
 AWS_REGION=
+AWS_ACCESS_KEY_ID=
+AWS_SECRET_ACCESS_KEY=
 ```
 _Note: by default the application runs with local environment variables._
 
@@ -72,11 +74,11 @@ then you can see new archives in [to_process](resources/to_process) to system pr
 ### Deployment
 1. Deploy the application
 ```bash
-docker build -t rie-kaneko/credit-cards-summary .
+docker build . -t credit-cards-summary
 ````
 2. Run the container
 ```bash
-docker run -d --name credit-cards-summary rie-kaneko/credit-cards-summary
+docker run -t credit-cards-summary
 ```
 3. Verify the running container
 ```bash
