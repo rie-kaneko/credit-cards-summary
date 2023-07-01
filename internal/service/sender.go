@@ -15,8 +15,13 @@ type Email struct {
 	Balance         string
 	DebitAverage    float64
 	CreditAverage   float64
-	NumTransactions map[string]int
+	NumTransactions []NumTransactions
 	Email           string
+}
+
+type NumTransactions struct {
+	Month string
+	Count int
 }
 
 func (s *Service) sendMail(e *Email) error {

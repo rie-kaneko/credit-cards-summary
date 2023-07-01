@@ -2,9 +2,11 @@ package provider
 
 import (
 	"github.com/aws/aws-sdk-go/aws"
+	"github.com/aws/aws-sdk-go/aws/credentials"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/aws/aws-sdk-go/service/dynamodb"
 	"github.com/aws/aws-sdk-go/service/ses"
+	"rie-kaneko/credit-cards-summary/config"
 )
 
 type Service struct {
@@ -13,8 +15,8 @@ type Service struct {
 	DynamoClient *dynamodb.DynamoDB
 }
 
-func NewService(region string) (*Service, error) {
-	sess, err := createSession(region)
+func NewService(conf config.AWSConfig) (*Service, error) {
+	sess, err := createSession(conf)
 	if err != nil {
 		return nil, err
 	}
@@ -26,9 +28,10 @@ func NewService(region string) (*Service, error) {
 	}, nil
 }
 
-func createSession(region string) (*session.Session, error) {
+func createSession(conf config.AWSConfig) (*session.Session, error) {
 	return session.NewSession(&aws.Config{
-		Region: aws.String(region),
+		Region:      aws.String(conf.Region),
+		Credentials: credentials.NewStaticCredentials(conf.AccessKey, conf.SecretKey, ""),
 	})
 }
 

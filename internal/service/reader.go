@@ -59,6 +59,9 @@ func (s *Service) summaryInformation(tsCredit, tsDebit []transaction) (*Email, e
 	}
 
 	user, err := s.AwsService.GetUser(s.CorrelationID)
+	if err != nil {
+		return nil, err
+	}
 
 	return &Email{
 		ID:              user.ID,
@@ -66,7 +69,7 @@ func (s *Service) summaryInformation(tsCredit, tsDebit []transaction) (*Email, e
 		Balance:         fmt.Sprintf("%.2f", tCredit+tDebit),
 		DebitAverage:    avDebit,
 		CreditAverage:   avCredit,
-		NumTransactions: numTrans,
+		NumTransactions: sortNumTransaction(numTrans),
 		Email:           user.EmailAddress,
 	}, err
 }
@@ -111,6 +114,21 @@ func getNumTransactions(numTrans map[string]int, date string) (map[string]int, e
 	numTrans[m]++
 
 	return numTrans, nil
+}
+
+func sortNumTransaction(numTrans map[string]int) []NumTransactions {
+	nt := make([]NumTransactions, 0, len(numTrans))
+	sortKeys := []string{"January", "February", "March", "April", "May", "June", "July", "August", "September",
+		"October", "November", "December"}
+
+	for _, v := range sortKeys {
+		nt = append(nt, NumTransactions{
+			Month: v,
+			Count: numTrans[v],
+		})
+	}
+
+	return nt
 }
 
 func moveFileToProcessed(csvPath, fileName string) error {
